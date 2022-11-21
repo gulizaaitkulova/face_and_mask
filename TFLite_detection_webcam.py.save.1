@@ -27,13 +27,6 @@ import time
 from threading import Thread
 import importlib.util
 
-import face_recognition
-import pickle
-
-currentname = "Unknown"
-encodingsP = "encodings.pickle"
-encoding_data = pickle.loads(open(encodingsP, "rb").read())
-
 # Define and parse input arguments
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -194,35 +187,14 @@ while True:
             ymax = int(min(imH, (boxes[i][2] * imH)))
             xmax = int(min(imW, (boxes[i][3] * imW)))
 
-            ymin = int(max(ymin - (ymax-ymin), 0))
-
-            encodings = face_recognition.face_encodings(frame, [(ymin, xmax, ymax, xmin)])
-            matches = face_recognition.compare_faces(encoding_data["encodings"], encodings[0])
-            name = "Unkown"
-            if True in matches: 
-                matchedIdxs = [i for (i, b) in enumerate(matches) if b]
-                counts = {}
-                for j in matchedIdxs:
-                    name = encoding_data["names"][j]
-                    counts[name] = counts.get(name, 0) + 1
-                    name = max(counts, key=counts.get)
-
-                    if currentname != name:
-                        currentname = name
-                        print(currentname)
-            
-            object_name = labels[int(classes[i])]
-            if object_name == "bare":
-                description = f"{name} has no mask!"
-            else:
-                description = f"{name} has mask !"
-            print(name, "detected !")
-
-	    # Draw label
-            # Look up object name from "labels" array using class index
+            ymin = int(max(ymin - (ymax-ymin)/2, 0))
+			# Draw label
+            object_name = labels[
+                int(classes[i])
+            ]  # Look up object name from "labels" array using class index
             face_box_color = (0, 10, 255) if object_name == "bare" else (10, 255, 0)
             label = "%s: %d%%" % (
-                description,
+                object_name,
                 int(scores[i] * 100),
             )  # Example: 'person: 72%'
             labelSize, baseLine = cv2.getTextSize(
