@@ -64,6 +64,11 @@ parser.add_argument(
     help="Use Coral Edge TPU Accelerator to speed up detection",
     action="store_true",
 )
+parser.add_argument(
+    "--profiler",
+    help="Measure time",
+    action="store_true",
+)
 
 args = parser.parse_args()
 
@@ -152,7 +157,9 @@ time.sleep(1)
 # for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
 while True:
     # Start timer (for calculating frame rate)
-    t1 = cv2.getTickCount()
+    # t1 = cv2.getTickCount()
+
+    start = time.time()
 
     # Grab frame from video stream
     frame = videostream.read()
@@ -183,6 +190,11 @@ while True:
     ]  # Confidence of detected objects
     # num = interpreter.get_tensor(output_details[3]['index'])[0]  # Total number of detected objects (inaccurate and not needed)
 
+    interpreter_time = time.time() - start
+    face_rec_time = 0
+    face_rec_encodings = 0
+    face_rec_matches = 0
+
     # Loop over all detections and draw detection box if confidence is above minimum threshold
     for i in range(len(scores)):
         if (scores[i] > min_conf_threshold) and (scores[i] <= 1.0):
@@ -196,7 +208,10 @@ while True:
 
             ymin = int(max(ymin - (ymax-ymin), 0))
 
-            encodings = face_recognition.face_encodings(frame, [(ymin, xmax, ymax, xmin)])
+            face_rec_start = time.time()
+            border = 10
+            encodings = face_recognition.face_encodings(frame, [(ymin+border, xmax-border, ymax-border, xmin+border)], num_jitters=1, model='small')
+            face_rec_encodings += time.time() - face_rec_start
             matches = face_recognition.compare_faces(encoding_data["encodings"], encodings[0])
             name = "Unkown"
             if True in matches: 
@@ -217,6 +232,8 @@ while True:
             else:
                 description = f"{name} has mask !"
             print(name, "detected !")
+            face_rec_end = time.time()
+            face_rec_time += face_rec_end - face_rec_start
 
 	    # Draw label
             # Look up object name from "labels" array using class index
@@ -266,10 +283,21 @@ while True:
     # All the results have been drawn on the frame, so it's time to display it.
     cv2.imshow("Object detector", frame)
 
-    # Calculate framerate
-    t2 = cv2.getTickCount()
-    time1 = (t2 - t1) / freq
-    frame_rate_calc = 1 / time1
+    # # Calculate framerate
+    # t2 = cv2.getTickCount()
+    # time1 = (t2 - t1) / freq
+    # frame_rate_calc = 1 / time1
+
+    total_time = time.time() - start
+    frame_rate_calc = 1 / total_time
+
+    if args.profiler:
+        print(f"Face Rec Time       : {face_rec_time}")
+        print(f"    ---> Encodings      : {face_rec_encodings}")
+        print(f"Interpreter Time    : {interpreter_time}")
+        print(f"Total Time          : {total_time}")
+        print(f"FPS                 : {frame_rate_calc}")
+        print()
 
     # Press 'q' to quit
     if cv2.waitKey(1) == ord("q"):
