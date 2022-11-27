@@ -1,3 +1,32 @@
+# Mask Detection and Face Recognition
+This is the final project for IOT class at Inha University. In this project we have implemented mask detection and face recognition models and deployed them on Raspberry Pi3.
+
+## Installation and Quickstart
+1. First create python virtual environment:   
+    ```
+    python -m venv iot_env
+    ```
+2. Activate the environment:
+    ```
+    source iot_env/bin/activate
+    ```
+3. Go to project directory and install requirements:
+    ```
+    pip install -r requirements.txt
+    ```
+4. Install additional library:
+    ```
+    python3 -m pip install tflite-runtime
+    ```
+5. Run the code:
+    ```
+    python TFLite_detection_webcam.py --modeldir TFLite_model
+    ```
+
+## Demo
+![demo](assets/ggg.png)
+
+# -----------------------------------------------------------------
 # Mask Detector with TFLite Object Detection API in Microcontroller
 
 This project using python 3.6

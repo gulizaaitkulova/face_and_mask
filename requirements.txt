@@ -13,8 +13,8 @@ Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
 Markdown==3.2.2
 mock==4.0.2
-numpy==1.19.0
-# opencv-python==4.3.0.38
+numpy
+opencv-python
 pathspec==0.8.0
 protobuf==3.12.2
 regex==2020.7.14
@@ -27,3 +27,5 @@ toml==0.10.1
 typed-ast==1.4.1
 Werkzeug==1.0.1
 zipp==3.1.0
+imutils
+face-recognition
